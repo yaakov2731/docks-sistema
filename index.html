@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Docks del Puerto Tigre – Administración</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root{
+      --md-blue:#1e88e5; --md-red:#e53935; --md-yellow:#fbc02d; --md-green:#43a047;
+      --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#94a3b8;
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,#0b1020,#1b2840);color:var(--text)}
+    header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #223}
+    header img{height:40px;width:auto}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
+    .grid{display:grid;gap:16px}
+    @media(min-width:900px){.grid.cols-3{grid-template-columns:repeat(3,1fr)}}
+    .card{background:rgba(17,24,39,.8);backdrop-filter:blur(6px);border-radius:var(--radius);padding:16px;box-shadow:0 12px 30px rgba(0,0,0,.35), inset 0 2px 0 rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.06)}
+    .title{font-weight:700}
+    .muted{color:var(--muted)}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:none;border-radius:14px;color:white;cursor:pointer;transition:transform .12s ease, box-shadow .12s ease;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 10px 18px rgba(0,0,0,.35)}
+    .btn:hover{transform:translateY(-1px)}
+    .btn:active{transform:translateY(0)}
+    .b-blue{background:linear-gradient(180deg,#42a5f5,#1e88e5)}
+    .b-red{background:linear-gradient(180deg,#ef5350,#e53935)}
+    .b-yellow{background:linear-gradient(180deg,#ffd54f,#fbc02d);color:#222}
+    .b-green{background:linear-gradient(180deg,#66bb6a,#43a047)}
+    input,select,textarea{width:100%;background:#0b1224;border:1px solid #223;color:var(--text);padding:10px 12px;border-radius:10px}
+    label{display:block;margin:8px 0 6px}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left}
+    .kpi{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.15));box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+    .hidden{display:none}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .chip{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06)}
+    .print-area{background:white;color:#111;padding:24px;border-radius:12px}
+    @media print{ header, .no-print{ display:none !important } body{ background:white } .print-area{ box-shadow:none } }
+  </style>
+</head>
+<body>
+<header>
+  <img id="logo" src="assets/logo.png" alt="Docks" onerror="this.style.display='none'"/>
+  <div>
+    <div class="title">Docks del Puerto Tigre – Administración</div>
+    <div class="muted">Reclamos • Sugerencias • Mantenimiento • Cobros • Impresión</div>
+  </div>
+</header>
+<div class="wrap">
+
+  <!-- Login -->
+  <div id="view-login" class="card">
+    <div class="title" style="margin-bottom:8px">Ingresar</div>
+    <div class="grid">
+      <div>
+        <label>Usuario</label>
+        <input id="in-user" placeholder="usuario o localId" />
+      </div>
+      <div>
+        <label>Contraseña</label>
+        <input id="in-pass" type="password" placeholder="••••••" />
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px">
+      <button class="btn b-blue" onclick="login()">Entrar</button>
+      <span class="muted">Demo: 001/local001 · mantenimiento/mant123 · gerente/admin123</span>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="view-app" class="hidden">
+    <!-- Tabs -->
+    <div class="tabs no-print">
+      <span class="chip" id="chip-user"></span>
+      <button class="btn b-blue" onclick="showPane('dashboard')">Dashboard</button>
+      <button class="btn b-yellow" id="tab-reclamos" onclick="showPane('reclamos')">Reclamos</button>
+      <button class="btn b-green" id="tab-sugerencias" onclick="showPane('sugerencias')">Sugerencias</button>
+      <button class="btn b-red" id="tab-mant" onclick="showPane('mant')">Mantenimiento</button>
+      <button class="btn b-blue" id="tab-cobros" onclick="showPane('cobros')">Cobros</button>
+      <button class="btn b-yellow" onclick="showPane('imp')">Imprimir A4</button>
+      <button class="btn b-red" onclick="logout()">Salir</button>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="pane-dashboard" class="grid cols-3">
+      <div class="card kpi"><div>Reclamos (totales)</div><div id="k-reclamos">-</div></div>
+      <div class="card kpi"><div>Nuevos</div><div id="k-nuevos">-</div></div>
+      <div class="card kpi"><div>En proceso</div><div id="k-proc">-</div></div>
+      <div class="card kpi"><div>Resueltos</div><div id="k-res">-</div></div>
+      <div class="card kpi"><div>Sugerencias</div><div id="k-sug">-</div></div>
+      <div class="card kpi"><div>Cobros pendientes</div><div id="k-cob">-</div></div>
+    </div>
+
+    <!-- Reclamos -->
+    <div id="pane-reclamos" class="hidden">
+      <div class="grid cols-3">
+        <div class="card">
+          <div class="title">Crear Reclamo</div>
+          <label>Local</label><input id="rec-local" />
+          <label>Categoría</label>
+          <select id="rec-cat"><option>Electricidad</option><option>Plomería</option><option>Estructura</option><option>Otros</option></select>
+          <label>Descripción</label><textarea id="rec-desc"></textarea>
+          <label>Prioridad</label>
+          <select id="rec-prio"><option>Alta</option><option selected>Media</option><option>Baja</option></select>
+          <div style="margin-top:10px"><button class="btn b-blue" onclick="crearReclamo()">Enviar</button></div>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="title">Listado de Reclamos</div>
+          <table id="tbl-reclamos"><thead><tr><th>ID</th><th>Fecha</th><th>Local</th><th>Cat</th><th>Desc</th><th>Prio</th><th>Estado</th><th>Asignado</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sugerencias -->
+    <div id="pane-sugerencias" class="hidden">
+      <div class="grid cols-3">
+        <div class="card">
+          <div class="title">Nueva Sugerencia</div>
+          <label>Local</label><input id="sug-local" />
+          <label>Asunto</label><input id="sug-asunto" />
+          <label>Mensaje</label><textarea id="sug-msg"></textarea>
+          <div style="margin-top:10px"><button class="btn b-green" onclick="crearSugerencia()">Enviar</button></div>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="title">Listado de Sugerencias</div>
+          <table id="tbl-sug"><thead><tr><th>ID</th><th>Fecha</th><th>Local</th><th>Asunto</th><th>Estado</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mantenimiento -->
+    <div id="pane-mant" class="hidden">
+      <div class="grid cols-3">
+        <div class="card">
+          <div class="title">Asignar Tarea</div>
+          <label>ID Reclamo</label><input id="t-reclamo" />
+          <label>Tarea</label><input id="t-nombre" />
+          <label>Asignar a</label><input id="t-asig" placeholder="mantenimiento" />
+          <div style="margin-top:10px"><button class="btn b-yellow" onclick="asignarTarea()">Asignar</button></div>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="title">Tareas</div>
+          <table id="tbl-tareas"><thead><tr><th>ID</th><th>Reclamo</th><th>Tarea</th><th>Asignado</th><th>Estado</th><th>Acciones</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cobros -->
+    <div id="pane-cobros" class="hidden">
+      <div class="grid cols-3">
+        <div class="card">
+          <div class="title">Registrar Cobro</div>
+          <label>Local</label><input id="c-local" />
+          <label>Periodo (YYYY-MM)</label><input id="c-per" />
+          <label>Monto</label><input id="c-monto" type="number" />
+          <label>Estado</label>
+          <select id="c-est"><option>Pendiente</option><option>Pagado</option></select>
+          <div style="margin-top:10px"><button class="btn b-green" onclick="registrarCobro()">Guardar</button></div>
+        </div>
+        <div class="card" style="grid-column: span 2">
+          <div class="title">Cobros</div>
+          <table id="tbl-cobros"><thead><tr><th>ID</th><th>Local</th><th>Periodo</th><th>Monto</th><th>Estado</th><th>Fecha Pago</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Impresión A4 -->
+    <div id="pane-imp" class="hidden">
+      <div class="grid">
+        <div class="card">
+          <div class="title">Plantilla A4</div>
+          <label>Título</label><input id="imp-tit"/>
+          <label>Contenido</label><textarea id="imp-con" rows="6"></textarea>
+          <label>QR (datos)</label><input id="imp-qr" placeholder="Texto o URL para el QR"/>
+          <div style="margin-top:10px" class="no-print">
+            <button class="btn b-blue" onclick="generarImpresion()">Generar</button>
+            <button class="btn b-yellow" onclick="window.print()">Imprimir</button>
+          </div>
+        </div>
+        <div class="print-area" id="print-area">
+          <h2 id="p-tit">—</h2>
+          <div id="p-con">—</div>
+          <div id="p-qr" style="margin-top:16px"></div>
+          <div style="margin-top:40px;display:flex;gap:40px">
+            <div style="border-top:1px solid #111;padding-top:8px;width:220px">Firma 1</div>
+            <div style="border-top:1px solid #111;padding-top:8px;width:220px">Firma 2</div>
+            <div style="border-top:1px solid #111;padding-top:8px;width:220px">Firma 3</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbznwvB0j2OC5z3Eb0tcvjNnVBcKqJLXELQpPQlQQ_4VfrsZ_zv5ET8tMGeLn10q9W3t/exec'; // <- pegar aquí la URL /exec
+  let SESSION = null; // { token, rol, usuario, localId }
+
+  function $(q){ return document.querySelector(q); }
+  function el(tag, attrs={}, children=[]) { const e=document.createElement(tag); Object.entries(attrs).forEach(([k,v])=>e[k]=v); children.forEach(c=>e.appendChild(c)); return e; }
+  function fmt(n){ return new Intl.NumberFormat('es-AR').format(Number(n||0)); }
+
+  async function api(action, params){
+    const res = await fetch(API_BASE_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ action, params }) });
+    return res.json();
+  }
+
+  // Auth
+  async function login(){
+    const usuario = $('#in-user').value.trim();
+    const password = $('#in-pass').value.trim();
+    const r = await api('login', { usuario, password });
+    if (!r.ok) return alert(r.error||'Login falló');
+    SESSION = { token:r.token, rol:r.rol, usuario, localId:r.localId||'' };
+    localStorage.setItem('docks_session', JSON.stringify(SESSION));
+    initApp();
+  }
+  function logout(){ localStorage.removeItem('docks_session'); location.reload(); }
+
+  function initApp(){
+    $('#view-login').classList.add('hidden');
+    $('#view-app').classList.remove('hidden');
+    $('#chip-user').textContent = `${SESSION.usuario} • ${SESSION.rol}${SESSION.localId?(' • '+SESSION.localId):''}`;
+    // permisos por rol
+    const isLoc = SESSION.rol==='Locatario';
+    $('#tab-mant').style.display = (SESSION.rol!=='Mantenimiento' && SESSION.rol!=='Gerente')? 'none':'inline-flex';
+    $('#tab-cobros').style.display = (SESSION.rol==='Gerente')? 'inline-flex':'none';
+    $('#rec-local').value = isLoc ? SESSION.localId : '';
+    $('#sug-local').value = isLoc ? SESSION.localId : '';
+    showPane('dashboard');
+  }
+
+  // Navegación
+  function showPane(key){
+    ['dashboard','reclamos','sugerencias','mant','cobros','imp'].forEach(k=>{
+      const el = document.querySelector(`#pane-${k}`); if (!el) return; el.classList.toggle('hidden', k!==key);
+    });
+    if (key==='dashboard') cargarDashboard();
+    if (key==='reclamos') { listarReclamos(); listarTareas(); }
+    if (key==='sugerencias') listarSugerencias();
+    if (key==='mant') listarTareas();
+    if (key==='cobros') listarCobros();
+  }
+
+  // Dashboard
+  async function cargarDashboard(){
+    const r = await api('dashboardStats', {});
+    if (!r.ok) return; const s=r.stats;
+    $('#k-reclamos').textContent = fmt(s.reclamos_total);
+    $('#k-nuevos').textContent = fmt(s.reclamos_nuevo);
+    $('#k-proc').textContent = fmt(s.reclamos_progreso);
+    $('#k-res').textContent = fmt(s.reclamos_resuelto);
+    $('#k-sug').textContent = fmt(s.sugerencias);
+    $('#k-cob').textContent = fmt(s.cobros_pendientes);
+  }
+
+  // Reclamos
+  async function crearReclamo(){
+    const localId = $('#rec-local').value.trim();
+    const categoria = $('#rec-cat').value; const descripcion = $('#rec-desc').value; const prioridad=$('#rec-prio').value;
+    if (!localId || !descripcion) return alert('Local y descripción son obligatorios');
+    const r = await api('crearReclamo', { localId, categoria, descripcion, prioridad });
+    if (!r.ok) return alert(r.error||'Error');
+    listarReclamos(); cargarDashboard();
+    alert('Reclamo creado: '+r.id);
+  }
+  function trReclamo(r){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.id}</td><td>${r.fecha||''}</td><td>${r.localId}</td><td>${r.categoria}</td><td>${r.descripcion}</td><td>${r.prioridad}</td><td>${r.estado}</td><td>${r.asignadoA||''}</td><td></td>`;
+    const tdAcc = tr.lastChild;
+    if (SESSION.rol!=='Locatario'){
+      const sel = el('select'); ['Nuevo','En proceso','Resuelto'].forEach(s=>{ const o=el('option'); o.value=s; o.textContent=s; if (s===r.estado) o.selected=true; sel.appendChild(o); });
+      const asig = el('input'); asig.placeholder='asignado a'; asig.value=r.asignadoA||'';
+      const btn = el('button',{className:'btn b-green', innerText:'Actualizar'});
+      btn.onclick= async ()=>{
+        const rr = await api('actualizarEstadoReclamo',{id:r.id,estado:sel.value,asignadoA:asig.value});
+        if (!rr.ok) return alert(rr.error||'Error'); listarReclamos(); cargarDashboard();
+      };
+      tdAcc.appendChild(sel); tdAcc.appendChild(asig); tdAcc.appendChild(btn);
+    }
+    return tr;
+  }
+  async function listarReclamos(){
+    const r = await api('listarReclamos',{ rol:SESSION.rol, localId:SESSION.localId });
+    if (!r.ok) return; const tbody=$('#tbl-reclamos tbody'); tbody.innerHTML='';
+    r.reclamos.forEach(x=> tbody.appendChild(trReclamo(x)) );
+  }
+
+  // Sugerencias
+  async function crearSugerencia(){
+    const localId = $('#sug-local').value.trim();
+    const asunto = $('#sug-asunto').value.trim();
+    const mensaje = $('#sug-msg').value.trim();
+    if (!localId || !asunto) return alert('Local y asunto son obligatorios');
+    const r = await api('crearSugerencia',{ localId, asunto, mensaje });
+    if (!r.ok) return alert(r.error||'Error'); listarSugerencias(); cargarDashboard();
+  }
+  async function listarSugerencias(){
+    const r = await api('listarSugerencias',{ rol:SESSION.rol, localId:SESSION.localId });
+    if (!r.ok) return; const tbody=$('#tbl-sug tbody'); tbody.innerHTML='';
+    r.sugerencias.forEach(s=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${s.id}</td><td>${s.fecha}</td><td>${s.localId}</td><td>${s.asunto}</td><td>${s.estado}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Mantenimiento
+  async function asignarTarea(){
+    const reclamoId = $('#t-reclamo').value.trim();
+    const tarea = $('#t-nombre').value.trim();
+    const asignadoA = $('#t-asig').value.trim();
+    if (!reclamoId || !tarea) return alert('Reclamo y tarea obligatorios');
+    const r = await api('asignarTarea',{ reclamoId, tarea, asignadoA });
+    if (!r.ok) return alert(r.error||'Error'); listarTareas();
+  }
+  async function listarTareas(){
+    const r = await api('listarTareas',{});
+    if (!r.ok) return; const tbody=$('#tbl-tareas tbody'); tbody.innerHTML='';
+    r.tareas.forEach(t=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${t.id}</td><td>${t.reclamoId}</td><td>${t.tarea}</td><td>${t.asignadoA}</td><td>${t.estado}</td><td></td>`;
+      if (SESSION.rol!=='Locatario'){
+        const btn = el('button',{className:'btn b-green', innerText:'Completar'});
+        btn.onclick= async ()=>{ const rr=await api('completarTarea',{id:t.id}); if (!rr.ok) return alert(rr.error||'Error'); listarTareas(); };
+        tr.lastChild.appendChild(btn);
+      }
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Cobros
+  async function registrarCobro(){
+    const localId=$('#c-local').value.trim(); const periodo=$('#c-per').value.trim(); const monto=Number($('#c-monto').value||0); const estado=$('#c-est').value;
+    if (!localId || !periodo || !monto) return alert('Completar Local, Periodo y Monto');
+    const r=await api('registrarCobro',{ localId, periodo, monto, estado });
+    if (!r.ok) return alert(r.error||'Error'); listarCobros(); cargarDashboard();
+  }
+  async function listarCobros(){
+    const r = await api('listarCobros',{ rol:SESSION.rol, localId:SESSION.localId });
+    if (!r.ok) return; const tbody=$('#tbl-cobros tbody'); tbody.innerHTML='';
+    r.cobros.forEach(c=>{
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${c.id}</td><td>${c.localId}</td><td>${c.periodo}</td><td>$ ${fmt(c.monto)}</td><td>${c.estado}</td><td>${c.fechaPago||''}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Impresión
+  async function generarImpresion(){
+    const titulo=$('#imp-tit').value; const contenido=$('#imp-con').value; const qrData=$('#imp-qr').value||location.href;
+    const r=await api('crearImpresion',{ titulo, contenido, qrData }); if (!r.ok) return alert(r.error||'Error');
+    $('#p-tit').textContent=titulo; $('#p-con').textContent=contenido; $('#p-qr').innerHTML='';
+    new QRCode(document.getElementById('p-qr'), { text: qrData, width: 140, height: 140 });
+  }
+
+  // Auto-login si existe sesión
+  (function(){ try{ const s=JSON.parse(localStorage.getItem('docks_session')); if (s && s.token){ SESSION=s; initApp(); } }catch(_){} })();
+</script>
+</body>
+</html>

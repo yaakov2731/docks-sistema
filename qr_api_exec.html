@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR API Docks – Imprimir</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 24px; }
+    .card { max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 12px; padding: 24px; }
+    h1 { font-size: 20px; margin: 0 0 8px 0; }
+    .muted { color: #666; margin-bottom: 16px; word-break: break-all; }
+    #qrc { display: flex; justify-content: center; padding: 12px; }
+    .row { display: flex; gap: 12px; justify-content: center; margin-top: 12px; }
+    button { padding: 8px 14px; border-radius: 8px; border: 1px solid #ccc; background: #f5f5f5; cursor: pointer; }
+    @media print { .row { display: none } .card { border: none } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>QR – API WebApp (/exec)</h1>
+    <div class="muted">https://script.google.com/macros/s/AKfycbznwvB0j2OC5z3Eb0tcvjNnVBcKqJLXELQpPQlQQ_4VfrsZ_zv5ET8tMGeLn10q9W3t/exec</div>
+    <div id="qrc"></div>
+    <div class="row">
+      <button onclick="window.print()">Imprimir</button>
+      <button onclick="window.location.href='https://script.google.com/macros/s/AKfycbznwvB0j2OC5z3Eb0tcvjNnVBcKqJLXELQpPQlQQ_4VfrsZ_zv5ET8tMGeLn10q9W3t/exec?action=dashboardStats'">Probar API</button>
+    </div>
+  </div>
+  <script>
+    new QRCode(document.getElementById('qrc'), { text: "https://script.google.com/macros/s/AKfycbznwvB0j2OC5z3Eb0tcvjNnVBcKqJLXELQpPQlQQ_4VfrsZ_zv5ET8tMGeLn10q9W3t/exec", width: 256, height: 256 });
+  </script>
+</body>
+</html>
